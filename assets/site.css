@@ -57,7 +57,7 @@ x-nb{white-space:nowrap}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .wrap{position:relative;max-width:calc(var(--w) + 48px);margin-inline:auto;padding-inline:24px}
 .tel-no{white-space:nowrap;font-family:var(--f-en);font-weight:700;letter-spacing:.04em}
-.en{font-family:var(--f-en);letter-spacing:.14em;text-transform:uppercase}
+.en{font-family:var(--f-en);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 .y{color:var(--yellow)}
 .hazard{height:12px;background:var(--hazard)}
 
@@ -254,7 +254,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .how{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:60px;align-items:center}
 .how-txt p{color:var(--on-dark-2)}
 .layers{border:1px solid rgba(255,255,255,.14);border-radius:var(--r);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-.layers-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:18px 24px 10px;background:var(--dark-2)}
+.layers-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;padding:18px 24px 10px;background:var(--dark-2)}
 .layers-top .en{font-size:12px;color:var(--yellow);letter-spacing:.22em}
 .layers-cap{font-size:13px;color:var(--on-dark-3)}
 .layer{position:relative;display:grid;grid-template-columns:7.4em minmax(0,1fr);gap:18px;align-items:center;padding:24px 26px}
@@ -483,6 +483,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .job-kinds b{display:block;font-size:18px;line-height:1.5}
 .job-kinds p{margin:2px 0 0;font-size:15px;color:var(--sub);line-height:1.6}
 @media (max-width:900px){.job{grid-template-columns:minmax(0,1fr);gap:28px}}
+@media (max-width:480px){.job-kinds li{grid-template-columns:84px minmax(0,1fr);gap:14px;padding:14px}.job-kinds .ic{width:84px}}
 
 .day{max-width:800px;margin-inline:auto;padding:10px 32px;border-radius:var(--r);background:#fff;border:1px solid var(--line)}
 .day li{display:grid;grid-template-columns:5.6em minmax(0,1fr);gap:20px;padding:20px 0;border-bottom:1px dashed var(--line)}

@@ -20,7 +20,7 @@
     : 'co';                                            // 漢字・カタカナ・英数字
 
   /* ひらがなで始まっても、行の頭に来てよい語 */
-  const FREE = /^(ください|くださ|いただ|ござい|あり|その|この|あの|どの|こちら|そちら|どちら|いつ|すべて|まず|また|すぐ|ぜひ|もし|もちろん|でき|しれな|おすすめ|おまかせ|そのまま|だいたい|ほとんど)/;
+  const FREE = /^(ください|くださ|いただ|ござい|あり|その|この|あの|どの|こちら|そちら|どちら|いつ|すべて|まず|また|すぐ|ぜひ|もし|もちろん|しれな|おすすめ|おまかせ|そのまま|だいたい|ほとんど)/;
   /* こと・とき など。「何社もの」のような言い方と分けるため、ひらがなの後ろでだけ行の頭に来てよい */
   const FORMAL = /^(こと|とき|もの|ところ|ため|ほう)/;
   /* 次の語と離さない語 */
@@ -33,7 +33,10 @@
   /* 閉じかっこのすぐ後の助詞を、行の頭に出さない */
   const GLUE = /[）」』】〉》)］\]][\u3041-\u309E]/g;
   /* 途中で切らない語（名前など）。切れ方がおかしい語があれば、ここに足す */
-  const NAMES = /穂碩工業|すいせきこうぎょう|かしわ台駅|ワイヤーメッシュ|ハウスメーカー/g;
+  const NAMES = /穂碩工業|すいせきこうぎょう|かしわ台駅|ハウスメーカー|いくつも|一つずつ|オンとオフ|同意したものとします/g;
+  /* 「の・と・や・な」のすぐ後ろは、前と後ろを合わせて短い（この字数以下）ときは切らない。会社の｜お金・オンと｜オフ・平らな｜土地 のような切れ方を防ぐ（2026-11-17） */
+  const JOIN_MAX = 8;
+  const core = t => len(t.replace(/[\s、。，．！？!?「」『』（）()・…〜]/g, ''));
 
   const cuts = text => {
     const s = [...seg.segment(text)].map(x => ({ t: x.segment, i: x.index, k: kind(x.segment) }));
@@ -79,6 +82,16 @@
       if (len(c.t) === 1 && (!n || n.k === 'end' || n.k === 'cl' || n.k === 'op' || n.k === 'sp' || AFTER_NOUN.test(n.t))) return;   // 「車」1字で行の頭に来ない
       out.add(c.i);
     });
+    {
+      const l = [...out].sort((x, y) => x - y);
+      for (let i = 0; i < l.length; i++) {
+        const b = l[i];
+        if (!/[のとやな]/.test(text[b - 1] || '')) continue;
+        const prev = i > 0 ? l[i - 1] : 0, next = i + 1 < l.length ? l[i + 1] : text.length;
+        const before = text.slice(prev, b), after = text.slice(b, next);
+        if (core(before) + core(after) <= JOIN_MAX) { out.delete(b); l.splice(i, 1); i--; }
+      }
+    }
     for (const m of text.matchAll(NAMES)) {
       for (let i = m.index + 1; i < m.index + m[0].length; i++) out.delete(i);
       if (m.index > 0 && kind(text[m.index - 1]) !== 'op') out.add(m.index);
