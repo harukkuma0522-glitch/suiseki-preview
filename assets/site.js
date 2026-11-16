@@ -31,6 +31,7 @@
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
       root.classList.toggle('nav-open', open);
+      document.querySelectorAll('main, .site-foot, .mbar').forEach(el => { el.inert = open; });
     };
     btn.addEventListener('click', () => set(btn.getAttribute('aria-expanded') !== 'true'));
     nav.addEventListener('click', e => { if (e.target.closest('a')) set(false); });
@@ -81,18 +82,24 @@
     });
 
     const fieldOf = el => el.closest('.field');
+    let errNo = 0;
     const setErr = (field, msg) => {
       field.classList.add('is-err');
       const p = field.querySelector('.err');
-      if (p) { p.textContent = msg; p.hidden = false; }
-      const ctl = field.querySelector('input,textarea');
-      if (ctl && ctl.type !== 'radio') ctl.setAttribute('aria-invalid', 'true');
+      if (p) {
+        if (!p.id) p.id = `${formName || 'form'}-err-${++errNo}`;
+        p.textContent = msg; p.hidden = false;
+      }
+      field.querySelectorAll('input,textarea').forEach(ctl => {
+        ctl.setAttribute('aria-invalid', 'true');
+        if (p) ctl.setAttribute('aria-describedby', p.id);
+      });
     };
     const clearErr = field => {
       field.classList.remove('is-err');
       const p = field.querySelector('.err');
       if (p) { p.textContent = ''; p.hidden = true; }
-      field.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+      field.querySelectorAll('[aria-invalid],[aria-describedby]').forEach(el => { el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); });
     };
     form.addEventListener('input', e => {
       const f = fieldOf(e.target);
@@ -134,18 +141,41 @@
         return;
       }
 
+      e.preventDefault();
+      const done = form.parentElement.querySelector('.form-done');
+      const fail = form.querySelector('.form-fail');
+      const showDone = () => {
+        if (!done) return;
+        form.hidden = true;
+        done.hidden = false;
+        done.focus();
+      };
       if (form.dataset.demo === '1') {
-        e.preventDefault();
-        const done = form.parentElement.querySelector('.form-done');
+        /* 確認用：実際には送らない */
         if (done) {
-          form.hidden = true;
-          done.hidden = false;
-          done.focus();
+          done.querySelector('h3').textContent += '（見本）';
+          done.querySelector('p').textContent = '確認用のページなので、実際には届いていません。公開のときに、本当に届くようにします。';
         }
+        showDone();
         track('form_submit', { form: formName, demo: true });
         return;
       }
-      track('form_submit', { form: formName });
+      const submit = form.querySelector('[type="submit"]');
+      if (submit) submit.disabled = true;
+      if (fail) fail.hidden = true;
+      fetch(form.getAttribute('action') || location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString()
+      }).then(r => {
+        if (!r.ok) throw new Error(String(r.status));
+        showDone();
+        track('form_submit', { form: formName });
+      }).catch(() => {
+        if (submit) submit.disabled = false;
+        if (fail) { fail.textContent = '送れませんでした。時間をおいてもう一度送るか、お電話（0467-76-2430）でご連絡ください。'; fail.hidden = false; fail.focus && fail.focus(); }
+        track('form_error', { form: formName, reason: 'send' });
+      });
     });
   });
 })();
