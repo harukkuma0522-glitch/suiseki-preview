@@ -11,6 +11,7 @@
   --yellow:#FFC21A;    /* 工事の黄：申込みのボタン・印・縞 */
   --yellow-d:#D49E00;
   --yellow-l:#FFF4D1;
+  --gold-ink:#7A5800;  /* 白い地の上の小さな英字（黄では読めないので濃い金。白で6.5・コンクリート色で5.8） */
   --ink:#151D26;       /* 字 */
   --sub:#4A5562;       /* 補助の字 */
   --on-dark:#FFFFFF;
@@ -214,7 +215,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .door{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"s go" "h go" "p p";gap:2px 16px;padding:26px 24px 24px;border:1px solid var(--line);border-left:5px solid var(--dark);border-radius:var(--r);background:#fff;color:var(--ink);text-decoration:none;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s,border-color .18s}
 .door:hover{transform:translateY(-3px);border-left-color:var(--yellow);box-shadow:0 2px 4px rgba(11,18,26,.06),0 18px 36px rgba(11,18,26,.13)}
-.door small{grid-area:s;font-family:var(--f-en);font-size:12px;font-weight:600;letter-spacing:.22em;color:var(--yellow-d);text-transform:uppercase;line-height:1.4}
+.door small{grid-area:s;font-family:var(--f-en);font-size:12px;font-weight:600;letter-spacing:.22em;color:var(--gold-ink);text-transform:uppercase;line-height:1.4}
 .door h3{grid-area:h;font-size:21px}
 .door p{grid-area:p;margin:10px 0 0;color:var(--sub);font-size:15px;line-height:1.7}
 .door .go{grid-area:go;align-self:center;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--dark);color:#fff;transition:background-color .2s,color .2s}
@@ -232,10 +233,10 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .svc-no::after{content:"";display:block;width:36px;height:5px;margin-top:8px;background:var(--yellow)}
 .svc-body{padding:22px 24px 28px}
 .svc h3{margin:0 0 8px;font-size:22px}
-.svc h3 .en{display:block;margin-bottom:2px;font-size:12px;font-weight:600;color:var(--yellow-d);letter-spacing:.2em}
+.svc h3 .en{display:block;margin-bottom:2px;font-size:12px;font-weight:600;color:var(--gold-ink);letter-spacing:.2em}
 .svc p{margin:0;color:var(--sub);font-size:16px;line-height:1.8}
 .svc-cta{background:var(--dark);color:var(--on-dark-2);padding:12px 4px 26px}
-.svc-cta::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:var(--hazard)}
+.svc-cta::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--yellow)}
 .svc-cta h3{color:#fff;margin-top:14px}
 .svc-cta p{color:var(--on-dark-2)}
 .svc-cta .svc-body{margin:6px 0 4px}
@@ -312,9 +313,6 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 
 /* ---------- 採用の帯（黄と写真） ---------- */
 .sec-yellow{background:var(--yellow);color:var(--ink)}
-.sec-yellow::before,.sec-yellow::after{content:"";position:absolute;left:0;right:0;height:14px;background:var(--hazard)}
-.sec-yellow::before{top:0}
-.sec-yellow::after{bottom:0}
 .sec-yellow .eyebrow .num{background:var(--dark);color:var(--yellow)}
 .rec{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:64px;align-items:center}
 .rec-ph{position:relative;margin:0 0 14px;border-radius:var(--r);box-shadow:16px 16px 0 var(--dark)}
@@ -344,7 +342,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .co-table a{color:var(--ink)}
 .access{position:relative;padding:28px;border:1px solid var(--line);border-radius:var(--r);background:var(--concrete)}
 .access h3{font-size:18px;margin-bottom:10px}
-.access h3 .en{display:block;font-size:12px;font-weight:600;color:var(--yellow-d);letter-spacing:.22em}
+.access h3 .en{display:block;font-size:12px;font-weight:600;color:var(--gold-ink);letter-spacing:.22em}
 .access address{font-style:normal;margin-bottom:18px}
 .access .btn{width:100%}
 .access .note{margin-top:14px}
@@ -359,7 +357,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 /* ---------- お問い合わせ ---------- */
 .contact{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:24px;align-items:start}
 .tel-card{position:sticky;top:calc(var(--head-h) + 20px);padding:34px 30px;border-radius:var(--r);background:var(--dark);color:var(--on-dark-2);overflow:hidden}
-.tel-card::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--hazard)}
+.tel-card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--yellow)}
 .tel-card h3{font-size:18px;margin:6px 0 10px;color:#fff}
 .tel-big{display:flex;align-items:center;gap:10px;color:var(--yellow);text-decoration:none;font-size:clamp(32px,3.4vw,42px);line-height:1.2}
 .tel-big svg{width:30px;height:30px;flex:none}
@@ -453,9 +451,9 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .phero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center}
 .phero .btns{margin-top:32px}
 .glance{position:relative;padding:30px 30px 22px;border-radius:var(--r);background:#fff;color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.4);overflow:hidden}
-.glance::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--hazard)}
+.glance::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--yellow)}
 .glance-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:6px 0 4px;font-weight:700}
-.glance-h .en{font-size:12px;color:var(--yellow-d);letter-spacing:.22em;margin-right:8px}
+.glance-h .en{font-size:12px;color:var(--gold-ink);letter-spacing:.22em;margin-right:8px}
 .glance dl{margin:0}
 .glance div{display:grid;grid-template-columns:4.2em minmax(0,1fr);align-items:baseline;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .glance div:last-child{border-bottom:0}
@@ -499,7 +497,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .cond-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;font-weight:700;color:var(--sub)}
 
 .partner{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;max-width:1000px;margin-inline:auto;padding:32px 32px 32px 44px;border-radius:var(--r);background:var(--dark);color:var(--on-dark-2);overflow:hidden}
-.partner::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;background:var(--hazard)}
+.partner::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--yellow)}
 .partner .ic{display:grid;place-items:center;width:64px;height:64px;margin-left:8px;border-radius:4px;background:var(--yellow);color:var(--dark)}
 .partner .ic svg{width:38px;height:38px}
 .partner h3{font-size:20px;color:#fff;margin-bottom:4px}
