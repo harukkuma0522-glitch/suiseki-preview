@@ -36,7 +36,7 @@
 }
 
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--head-h) + 12px)}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--head-h) + 12px);text-spacing-trim:trim-start}
 html.motion{scroll-behavior:smooth}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.85;letter-spacing:.02em;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}

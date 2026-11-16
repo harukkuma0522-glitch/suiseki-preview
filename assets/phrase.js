@@ -10,7 +10,7 @@
 
   const JA = /[぀-ヿ㐀-鿿]/;
   const KANJI = /^[㐀-鿿]+$/;
-  const SKIP = 'script,style,noscript,template,textarea,select,option,title,svg,.tel-no,.tbd';
+  const SKIP = 'script,style,noscript,template,textarea,select,option,title,svg,.tel-no,.tbd,.choices';
   const len = s => [...s].length;
   const kind = s => /^\s+$/.test(s) ? 'sp'
     : /^[、。，．！？!?…・／：]+$/.test(s) ? 'end'     // ここで切ってよい記号
@@ -30,8 +30,9 @@
   const PARTICLE = /^[はがをへもに]$/;
   /* 1字の名詞のあとに続く語 */
   const AFTER_NOUN = /^(は|が|を|に|で|と|も|へ|や|の|から|まで|など|です|より|だけ)/;
-  /* 閉じかっこのすぐ後の助詞を、行の頭に出さない */
-  const GLUE = /[）」』】〉》)］\]][\u3041-\u309E]/g;
+  /* 閉じかっこのすぐ後の助詞を、行の頭に出さない。開きかっこは直前の1字とつなげて、行の頭に来ないようにする
+     （かっこの字は左半分が空いているので、行の頭に来ると右へずれて見える。句読点・空白のすぐ後ろはつなげない。2026-11-17） */
+  const GLUE = /[）」』】〉》)］\]][ぁ-ゞ]|[^\s、。，．！？・（「『【〈《(［\[][（「『【〈《(［\[]/g;
   /* 途中で切らない語（名前など）。切れ方がおかしい語があれば、ここに足す */
   const NAMES = /穂碩工業|すいせきこうぎょう|かしわ台駅|ハウスメーカー|いくつも|一つずつ|オンとオフ|同意したものとします/g;
   /* 「の・と・や・な」のすぐ後ろは、前と後ろを合わせて短い（この字数以下）ときは切らない。会社の｜お金・オンと｜オフ・平らな｜土地 のような切れ方を防ぐ（2026-11-17） */
@@ -53,6 +54,7 @@
     s.forEach((c, a) => {
       const p = s[a - 1], n = s[a + 1], pp = s[a - 2];
       if (!p || c.k === 'sp' || p.k === 'sp' || c.k === 'end' || c.k === 'cl' || p.k === 'op') return;
+      if (c.k === 'op' && p.k !== 'end') return;   // 開きかっこの直前では切らない（行の頭の「は、字の左半分が空いて、ずれて見えるため。2026-11-17）
       if (p.k === 'end' || c.k === 'op') { out.add(c.i); return; }
       if (c.k === 'hi') {
         const rest = text.slice(c.i);
