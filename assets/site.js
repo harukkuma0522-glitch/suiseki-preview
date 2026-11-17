@@ -3,7 +3,8 @@
    - メニューの開け閉め、ヘッダーの影
    - フォームの確かめと送信（data-demo="1" の間は送らずに、送れたときの画面だけ見せる）
    - 計測：window.dataLayer に tel_click・form_error・form_submit を積む（解析のタグはまだ入れていない）
-   - 動き（第4版）：最初の画面の写真のスライド、事業内容のスライド、流れる英字の帯、写真の幕 */
+   - 動き（第4版）：最初の画面の写真のスライド、事業内容のスライド、流れる英字の帯、写真の幕
+   - 最初に社名を出す幕（トップだけ。2026-11-17） */
 (() => {
   'use strict';
   const root = document.documentElement;
@@ -182,6 +183,33 @@
 
   const motion = root.classList.contains('motion');
 
+  /* 4.5) 最初に社名を出す幕（トップだけ。head の小さなスクリプトが html.has-intro を付けたときだけ）
+          社名がぼんやり浮かび、ぼんやり消えて、ページにピントが合う（動きは CSS）。
+          押す・キー・スクロールで、すぐに消す。消えてから、写真のスライドを動かし始める。 */
+  const intro = document.querySelector('.intro');
+  const introOn = !!intro && root.classList.contains('has-intro');
+  const introDone = new Promise(done => {
+    if (!introOn) { if (intro) intro.remove(); done(); return; }
+    const evs = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'];
+    let ended = false;
+    const end = () => {
+      if (ended) return;
+      ended = true;
+      evs.forEach(t => window.removeEventListener(t, skip, { passive: true }));
+      intro.remove();
+      done();
+    };
+    function skip() {
+      if (intro.classList.contains('is-out') || intro.classList.contains('is-skip')) return;
+      intro.classList.add('is-skip');
+      root.classList.add('intro-skip');
+    }
+    evs.forEach(t => window.addEventListener(t, skip, { passive: true }));
+    intro.addEventListener('animationstart', e => { if (e.target === intro && !e.pseudoElement && e.animationName === 'introVeil') intro.classList.add('is-out'); });
+    intro.addEventListener('animationend', e => { if (e.target === intro && !e.pseudoElement && /^introVeilQ?$/.test(e.animationName)) end(); });
+    setTimeout(end, 6000);   // 念のため（動きの知らせが来なくても消す）
+  });
+
   /* 5) 最初の画面の写真のスライド（トップ）
         6秒ごとに重なって切りかわり、3周で止まる。「止める」ボタンと点で選べる。画面の外・裏のタブでは止まる。
         「動きを減らす」設定・データ節約の設定では自動で動かず、点で選ぶだけ。2枚目からは、ページを読み終えてから読む。 */
@@ -194,14 +222,14 @@
     const pauseBtn = hero.querySelector('.hs-pause');
     const INT = 6000, LOOPS = 3;
     hero.style.setProperty('--hs-int', INT / 1000 + 's');
-    let cur = 0, timer = 0, steps = 0, paused = !motion, inView = true;
+    let cur = 0, timer = 0, steps = 0, paused = !motion, inView = true, introWait = introOn;
     const load = s => {
       if (!s) return;
       s.querySelectorAll('[data-srcset]').forEach(el => { el.setAttribute('srcset', el.dataset.srcset); el.removeAttribute('data-srcset'); });
       s.querySelectorAll('img[data-src]').forEach(el => { el.src = el.dataset.src; el.removeAttribute('data-src'); });
     };
     let focusIn = false;   // キーボードで操作の所に来ている間は止めておく（マウスを乗せたときは止めない）
-    const running = () => !paused && !focusIn && inView && !document.hidden;
+    const running = () => !introWait && !paused && !focusIn && inView && !document.hidden;
     const restartBar = () => {
       hero.classList.remove('is-playing');
       void hero.offsetWidth;   // 進みぐあいの線を、はじめから動かし直す
@@ -251,6 +279,7 @@
     if (document.readyState === 'complete') load(slides[1]); else window.addEventListener('load', () => load(slides[1]));
     setPauseUi();
     start();
+    introDone.then(() => { if (introWait) { introWait = false; start(); } });   // 社名の幕が消えてから動かし始める
   }
 
   /* 6) 事業内容のスライド：矢印で1枚ずつ送る（スマホは指で横に送る）。端ではボタンを止める */
