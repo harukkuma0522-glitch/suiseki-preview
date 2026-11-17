@@ -2,7 +2,8 @@
    - 動きは html.motion のときだけ（「動きを減らす」設定・データ節約の設定では付けない）
    - メニューの開け閉め、ヘッダーの影
    - フォームの確かめと送信（data-demo="1" の間は送らずに、送れたときの画面だけ見せる）
-   - 計測：window.dataLayer に tel_click・form_error・form_submit を積む（解析のタグはまだ入れていない） */
+   - 計測：window.dataLayer に tel_click・form_error・form_submit を積む（解析のタグはまだ入れていない）
+   - 動き（第4版）：最初の画面の写真のスライド、事業内容のスライド、流れる英字の帯、写真の幕 */
 (() => {
   'use strict';
   const root = document.documentElement;
@@ -178,4 +179,130 @@
       });
     });
   });
+
+  const motion = root.classList.contains('motion');
+
+  /* 5) 最初の画面の写真のスライド（トップ）
+        6秒ごとに重なって切りかわり、3周で止まる。「止める」ボタンと点で選べる。画面の外・裏のタブでは止まる。
+        「動きを減らす」設定・データ節約の設定では自動で動かず、点で選ぶだけ。2枚目からは、ページを読み終えてから読む。 */
+  const hero = document.querySelector('.hero');
+  const hs = document.querySelector('[data-hero-slider]');
+  if (hero && hs) {
+    const slides = [...hs.querySelectorAll('.hs-slide')];
+    const dots = [...hero.querySelectorAll('.hs-dot')];
+    const cap = hero.querySelector('.hs-cap');
+    const pauseBtn = hero.querySelector('.hs-pause');
+    const INT = 6000, LOOPS = 3;
+    hero.style.setProperty('--hs-int', INT / 1000 + 's');
+    let cur = 0, timer = 0, steps = 0, paused = !motion, inView = true;
+    const load = s => {
+      if (!s) return;
+      s.querySelectorAll('[data-srcset]').forEach(el => { el.setAttribute('srcset', el.dataset.srcset); el.removeAttribute('data-srcset'); });
+      s.querySelectorAll('img[data-src]').forEach(el => { el.src = el.dataset.src; el.removeAttribute('data-src'); });
+    };
+    let focusIn = false;   // キーボードで操作の所に来ている間は止めておく（マウスを乗せたときは止めない）
+    const running = () => !paused && !focusIn && inView && !document.hidden;
+    const restartBar = () => {
+      hero.classList.remove('is-playing');
+      void hero.offsetWidth;   // 進みぐあいの線を、はじめから動かし直す
+      if (running()) hero.classList.add('is-playing');
+    };
+    const show = n => {
+      n = (n + slides.length) % slides.length;
+      if (n === cur) return;
+      load(slides[n]);
+      slides[cur].classList.remove('is-on');
+      slides[cur].setAttribute('aria-hidden', 'true');
+      if (dots[cur]) dots[cur].removeAttribute('aria-current');
+      cur = n;
+      slides[cur].classList.add('is-on');
+      slides[cur].removeAttribute('aria-hidden');
+      if (dots[cur]) dots[cur].setAttribute('aria-current', 'true');
+      if (cap) cap.textContent = slides[cur].dataset.cap || '';
+      load(slides[(cur + 1) % slides.length]);   // 次の写真を先に読んでおく
+    };
+    const setPauseUi = () => {
+      if (!pauseBtn) return;
+      pauseBtn.classList.toggle('is-paused', paused);
+      pauseBtn.querySelector('.hs-pause-t').textContent = paused ? '動かす' : '止める';
+    };
+    const stop = () => { clearInterval(timer); timer = 0; hero.classList.remove('is-playing'); };
+    const start = () => {
+      stop();
+      if (!running()) return;
+      timer = setInterval(() => {
+        if (++steps >= slides.length * LOOPS) { paused = true; setPauseUi(); stop(); return; }
+        show(cur + 1);
+        restartBar();
+      }, INT);
+      restartBar();
+    };
+    dots.forEach((d, i) => d.addEventListener('click', () => { show(i); start(); }));
+    const ctrl = hero.querySelector('.hs-ctrl');
+    if (ctrl) {
+      // キーボードで来たときだけ止める（マウスで押したときは :focus-visible にならない）
+      const byKey = el => { try { return el.matches(':focus-visible'); } catch (e) { return false; } };
+      ctrl.addEventListener('focusin', e => { if (byKey(e.target)) { focusIn = true; start(); } });
+      ctrl.addEventListener('focusout', e => { if (!ctrl.contains(e.relatedTarget)) { focusIn = false; start(); } });
+    }
+    if (pauseBtn) pauseBtn.addEventListener('click', () => { paused = !paused; if (!paused) { steps = 0; focusIn = false; } setPauseUi(); start(); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { inView = es[0].isIntersecting; start(); }, { threshold: 0.2 }).observe(hero);
+    document.addEventListener('visibilitychange', start);
+    if (document.readyState === 'complete') load(slides[1]); else window.addEventListener('load', () => load(slides[1]));
+    setPauseUi();
+    start();
+  }
+
+  /* 6) 事業内容のスライド：矢印で1枚ずつ送る（スマホは指で横に送る）。端ではボタンを止める */
+  document.querySelectorAll('[data-gallery]').forEach(g => {
+    const track = g.querySelector('.gal-track');
+    const sec = g.closest('section');
+    const prev = sec && sec.querySelector('.gal-btn.prev');
+    const next = sec && sec.querySelector('.gal-btn.next');
+    if (!track) return;
+    const step = () => {
+      const it = track.children[0];
+      return it ? it.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0) : track.clientWidth;
+    };
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      if (prev) prev.disabled = track.scrollLeft <= 2;
+      if (next) next.disabled = track.scrollLeft >= max;
+    };
+    if (prev) prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
+    if (next) next.addEventListener('click', () => track.scrollBy({ left: step() }));
+    let raf = 0;
+    track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  });
+
+  /* 7) 流れる英字の帯：スクロールに合わせて横に動く（自分では動かない） */
+  const bands = [...document.querySelectorAll('.mq')];
+  if (bands.length && motion) {
+    let raf = 0;
+    const move = () => {
+      raf = 0;
+      const vh = window.innerHeight;
+      bands.forEach(m => {
+        const r = m.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) return;
+        const p = (vh - r.top) / (vh + r.height);
+        const inner = m.firstElementChild;
+        inner.style.setProperty('--mx', (-p * inner.scrollWidth * 0.3).toFixed(1) + 'px');
+      });
+    };
+    window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(move); }, { passive: true });
+    move();
+  }
+
+  /* 8) 写真の幕：最初の画面より下にある写真だけ幕を閉じておき、画面に入ったら横に開く */
+  if (motion && 'IntersectionObserver' in window) {
+    const els = [...document.querySelectorAll('.rv')].filter(el => el.getBoundingClientRect().top > window.innerHeight);
+    els.forEach(el => el.classList.add('rv-wait'));
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.remove('rv-wait'); io.unobserve(e.target); }
+    }), { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(el => io.observe(el));
+  }
 })();
