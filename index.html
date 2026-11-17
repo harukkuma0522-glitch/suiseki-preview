@@ -157,7 +157,7 @@
         </div>
         <div class="gal-nav"><button class="gal-btn prev" type="button" aria-label="前の工事" aria-controls="gal-track"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="gal-btn next" type="button" aria-label="次の工事" aria-controls="gal-track"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       </div>
-      <div class="gal" data-gallery role="region" aria-label="工事の種類（横に送れます）">
+      <div class="gal" data-gallery data-auto role="region" aria-label="工事の種類（自動で横に送ります）">
         <ul class="gal-track" id="gal-track">
           <li class="gal-item">
             <article class="work">
@@ -175,7 +175,7 @@
               <div class="work-body">
                 <h3><span class="en">Paving</span>舗装</h3>
                 <p>道路・駐車場・通路を、アスファルトやコンクリートで仕上げます。古くなった舗装のやり直しもお受けします。</p>
-                <a class="more" href="residential.html">駐車場の舗装は個人のお客様へ<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                <a class="more" href="contact.html">お問い合わせ<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
               </div>
             </article>
           </li>
@@ -185,7 +185,7 @@
               <div class="work-body">
                 <h3><span class="en">Exterior</span>外構</h3>
                 <p>駐車場のコンクリート、ブロック塀、フェンス、門のまわりなど、家の外の工事です。</p>
-                <a class="more" href="residential.html">個人のお客様へ<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                <a class="more" href="contact.html">お問い合わせ<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
               </div>
             </article>
           </li>
@@ -195,7 +195,7 @@
               <div class="work-body">
                 <h3><span class="en">Demolition</span>解体</h3>
                 <p>建物やブロック塀、古いコンクリートなどを取りこわして、何もない平らな土地にします。</p>
-                <a class="more" href="residential.html">個人のお客様へ<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                <a class="more" href="contact.html">お問い合わせ<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
               </div>
             </article>
           </li>
@@ -220,7 +220,10 @@
           </li>
         </ul>
       </div>
-      <p class="note gal-hint">※ 解体の写真はイメージです。<span class="gal-swipe">横にスワイプすると、ほかの工事も見られます。</span></p>
+      <div class="gal-foot">
+        <p class="note gal-hint">※ 解体の写真はイメージです。<span class="gal-swipe">横にスワイプすると、ほかの工事も見られます。</span></p>
+        <button class="gal-pause" type="button" aria-controls="gal-track"><span class="gal-pause-ic" aria-hidden="true"></span><span class="sr">工事のスライドを</span><span class="gal-pause-t">止める</span></button>
+      </div>
     </div>
   </section>
 

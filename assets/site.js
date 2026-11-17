@@ -304,6 +304,46 @@
     track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); }, { passive: true });
     window.addEventListener('resize', update);
     update();
+
+    /* 6.5) 自動で送る（トップ。data-auto。2026-11-17、依頼主の「自動のスライドにする」から）
+            4.5秒ごとに1枚。端まで来たら最初へ戻り、2周で止まる。画面に半分以上見えている間だけ動き、裏のタブでは止まる。
+            指やマウスで送った・矢印を押したら自動はやめる（「動かす」で再開）。マウスを乗せている間と、キーボードで中に来ている間は止まる。
+            「動きを減らす」設定・データ節約の設定では動かさない（ボタンも出さない）。 */
+    const pauseBtn = sec && sec.querySelector('.gal-pause');
+    if (!motion || !g.hasAttribute('data-auto') || !pauseBtn) return;
+    const INT = 4500, LOOPS = 2;
+    let timer = 0, paused = false, hover = false, focusIn = false, inView = false, rounds = 0;
+    const atEnd = () => track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
+    const running = () => !paused && !hover && !focusIn && inView && !document.hidden;
+    const setUi = () => {
+      pauseBtn.classList.toggle('is-paused', paused);
+      pauseBtn.querySelector('.gal-pause-t').textContent = paused ? '動かす' : '止める';
+    };
+    const stop = () => { clearInterval(timer); timer = 0; };
+    const tick = () => {
+      if (atEnd()) {
+        if (++rounds >= LOOPS) { paused = true; setUi(); stop(); return; }
+        track.scrollTo({ left: 0 });
+      } else {
+        track.scrollBy({ left: step() });
+      }
+    };
+    const start = () => { stop(); if (running()) timer = setInterval(tick, INT); };
+    const takeOver = () => { if (!paused) { paused = true; setUi(); stop(); } };   // 自分で送ったら、自動はやめる
+    track.addEventListener('pointerdown', takeOver, { passive: true });
+    track.addEventListener('touchstart', takeOver, { passive: true });
+    track.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) takeOver(); }, { passive: true });
+    [prev, next].forEach(b => b && b.addEventListener('click', takeOver));
+    g.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { hover = true; stop(); } });
+    g.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { hover = false; start(); } });
+    const byKey = el => { try { return el.matches(':focus-visible'); } catch (e) { return false; } };
+    g.addEventListener('focusin', e => { if (byKey(e.target)) { focusIn = true; stop(); } });
+    g.addEventListener('focusout', e => { if (!g.contains(e.relatedTarget)) { focusIn = false; start(); } });
+    pauseBtn.addEventListener('click', () => { paused = !paused; if (!paused) { rounds = 0; hover = false; } setUi(); start(); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { inView = es[0].isIntersecting; start(); }, { threshold: 0.5 }).observe(g);
+    else { inView = true; start(); }
+    document.addEventListener('visibilitychange', start);
+    setUi();
   });
 
   /* 7) 流れる英字の帯：スクロールに合わせて横に動く（自分では動かない） */

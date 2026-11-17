@@ -820,3 +820,13 @@ html.intro-skip .hero-in>*{animation:introUp2 1s cubic-bezier(.2,.7,.2,1) var(--
 }
 /* 個別ページの最初の画面の写真の見せる位置（2026-11-17、会社の写真に入れかえて）。ページの <picture class="hero-bg"> の --pos（パソコン）・--pos-sp（スマホ）で決める */
 @media (max-width:900px){.phero-photo .hero-bg img,.phero-photo.is-wide .hero-bg img{object-position:var(--pos-sp,var(--pos,50% 40%))}}
+
+/* ---------- 事業内容のスライドを自動で送る（トップ・2026-11-17） ----------
+   4.5秒ごとに1枚。止めるボタンは下の注記の右（スマホは注記の下）。「動きを減らす」設定ではボタンも出さない */
+.gal-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;margin-top:2px}
+.gal-foot .gal-hint{margin:0}
+.gal-pause{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 16px;border:2px solid var(--blue);border-radius:4px;background:#fff;color:var(--blue);font-size:14px;font-weight:700;line-height:1.2;cursor:pointer;transition:background-color .15s}
+.gal-pause:hover{background:var(--sky-100)}
+.gal-pause-ic{width:10px;height:12px;border-left:3px solid currentColor;border-right:3px solid currentColor}
+.gal-pause.is-paused .gal-pause-ic{width:0;height:0;border:0;border-left:10px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent}
+html:not(.motion) .gal-pause{display:none}
