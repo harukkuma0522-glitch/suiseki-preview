@@ -439,7 +439,7 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 .phero-lead{max-width:34em;margin:22px 0 0;font-size:18px;color:var(--on-dark-2)}
 .phero .wrap{z-index:1}
 .phero-photo{isolation:isolate;padding-bottom:88px}
-.phero-photo .hero-bg img{object-position:50% 30%}
+.phero-photo .hero-bg img{object-position:var(--pos,50% 30%)}
 .phero-photo::before{content:"";position:absolute;top:0;bottom:0;left:calc(46% - 2px);width:12%;z-index:-1;background:linear-gradient(90deg,var(--hb),rgba(227,242,252,0))}
 .phero-photo .wrap>*:not(.phero-grid),.phero-photo .phero-grid>:first-child{max-width:min(620px,41vw)}
 @media (max-width:900px){.phero-photo::before{display:none}.phero-photo .wrap>*:not(.phero-grid),.phero-photo .phero-grid>:first-child{max-width:none}}
@@ -729,7 +729,7 @@ html.motion .rv-wait .rv-ph::before,html.motion .rv-wait.rv-ph::before{transform
 @media (max-width:480px){.facts-lite div{grid-template-columns:minmax(0,1fr);gap:2px;padding:10px 0}.facts-lite dt{font-size:14px;color:var(--sub)}}
 
 /* ---------- 個人・法人・会社概要・お問い合わせのページ ---------- */
-.phero-photo.is-wide .hero-bg img{object-position:62% 50%}
+.phero-photo.is-wide .hero-bg img{object-position:var(--pos,62% 50%)}
 .subsidy{position:relative;max-width:920px;padding:32px 32px 30px 38px;border:1px solid var(--sky-200);border-radius:var(--r);background:var(--sky-50)}
 .subsidy::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:var(--r) 0 0 var(--r);background:var(--blue)}
 .sub-amount{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -818,3 +818,5 @@ html.intro-skip .hero-in>*{animation:introUp2 1s cubic-bezier(.2,.7,.2,1) var(--
   .intro-en{margin-bottom:22px;font-size:12px}
   .intro-line{margin-top:26px}
 }
+/* 個別ページの最初の画面の写真の見せる位置（2026-11-17、会社の写真に入れかえて）。ページの <picture class="hero-bg"> の --pos（パソコン）・--pos-sp（スマホ）で決める */
+@media (max-width:900px){.phero-photo .hero-bg img,.phero-photo.is-wide .hero-bg img{object-position:var(--pos-sp,var(--pos,50% 40%))}}
