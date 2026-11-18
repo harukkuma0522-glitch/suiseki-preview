@@ -211,7 +211,7 @@
   });
 
   /* 5) 最初の画面の写真のスライド（トップ）
-        6秒ごとに重なって切りかわり、3周で止まる。「止める」ボタンと点で選べる。画面の外・裏のタブでは止まる。
+        3秒ごとに重なって切りかわり、6周（約72秒）で止まる。「止める」ボタンと点で選べる。画面の外・裏のタブでは止まる。
         「動きを減らす」設定・データ節約の設定では自動で動かず、点で選ぶだけ。2枚目からは、ページを読み終えてから読む。 */
   const hero = document.querySelector('.hero');
   const hs = document.querySelector('[data-hero-slider]');
@@ -220,7 +220,7 @@
     const dots = [...hero.querySelectorAll('.hs-dot')];
     const cap = hero.querySelector('.hs-cap');
     const pauseBtn = hero.querySelector('.hs-pause');
-    const INT = 6000, LOOPS = 3;
+    const INT = 3000, LOOPS = 6;   // 2026-11-18 に6秒から3秒へ（依頼主の「2倍速く」）。止まるまでの時間は前と同じ約72秒
     hero.style.setProperty('--hs-int', INT / 1000 + 's');
     let cur = 0, timer = 0, steps = 0, paused = !motion, inView = true, introWait = introOn;
     const load = s => {
@@ -298,52 +298,82 @@
       if (prev) prev.disabled = track.scrollLeft <= 2;
       if (next) next.disabled = track.scrollLeft >= max;
     };
-    if (prev) prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
-    if (next) next.addEventListener('click', () => track.scrollBy({ left: step() }));
+    // 流れている間は CSS のなめらかな送りを切るので、矢印ではここで指定する
+    const go = d => track.scrollBy({ left: d * step(), behavior: motion ? 'smooth' : 'auto' });
+    if (prev) prev.addEventListener('click', () => go(-1));
+    if (next) next.addEventListener('click', () => go(1));
     let raf = 0;
     track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); }, { passive: true });
     window.addEventListener('resize', update);
     update();
 
-    /* 6.5) 自動で送る（トップ。data-auto。2026-11-17、依頼主の「自動のスライドにする」から）
-            4.5秒ごとに1枚。端まで来たら最初へ戻り、2周で止まる。画面に半分以上見えている間だけ動き、裏のタブでは止まる。
-            指やマウスで送った・矢印を押したら自動はやめる（「動かす」で再開）。マウスを乗せている間と、キーボードで中に来ている間は止まる。
-            「動きを減らす」設定・データ節約の設定では動かさない（ボタンも出さない）。 */
+    /* 6.5) ゆっくり流れ続ける（トップ。data-auto。2026-11-18、依頼主の「ゆっくり流れ続けるように」から）
+            カードの後ろに同じ組をもう1つ写して置き（読み上げとキーボードからは隠す）、1秒に30pxずつ左へ流す。
+            1組ぶん進んだら頭に戻すので、つなぎ目は見えず、止まらずに流れ続ける。流れている間はカードの位置合わせ（スナップ）を切る。
+            画面に見えている間だけ動き、裏のタブでは止まる。マウスを乗せている間と、キーボードで中に来ている間は止まる。
+            指で送った・矢印を押したときは、その場所で止まり、3秒たつとそこから流れ直す。「止める」で止まり、「動かす」で流れ直す。
+            「動きを減らす」設定・データ節約の設定では流さない（写しも作らず、ボタンも出さない）。 */
     const pauseBtn = sec && sec.querySelector('.gal-pause');
     if (!motion || !g.hasAttribute('data-auto') || !pauseBtn) return;
-    const INT = 4500, LOOPS = 2;
-    let timer = 0, paused = false, hover = false, focusIn = false, inView = false, rounds = 0;
-    const atEnd = () => track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
-    const running = () => !paused && !hover && !focusIn && inView && !document.hidden;
+    const SPEED = 30, REST = 3000;   // 1秒に進む px と、指で送ったあと流れ直すまでの時間
+    const items = [...track.children];
+    items.forEach(it => {
+      const c = it.cloneNode(true);
+      c.classList.add('is-clone');
+      c.setAttribute('aria-hidden', 'true');
+      c.querySelectorAll('a, button').forEach(el => el.setAttribute('tabindex', '-1'));
+      c.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+      track.appendChild(c);
+    });
+    const period = () => track.children[items.length].offsetLeft - items[0].offsetLeft;   // 1組の長さ
+    let raf2 = 0, last = 0, pos = 0, rest = 0, paused = false, hover = false, focusIn = false, touching = false, inView = false;
+    const running = () => !paused && !hover && !focusIn && !touching && !rest && inView && !document.hidden;
+    const frame = t => {
+      raf2 = 0;
+      if (!running()) return;
+      pos += last ? SPEED * Math.min(t - last, 100) / 1000 : 0;
+      last = t;
+      const p = period();
+      if (p > 0 && pos >= p) pos -= p;
+      track.scrollLeft = pos;
+      raf2 = requestAnimationFrame(frame);
+    };
+    const stop = () => { cancelAnimationFrame(raf2); raf2 = 0; };
+    const start = () => {
+      if (raf2 || !running()) return;
+      track.classList.add('is-flow');
+      pos = track.scrollLeft;   // 今いる場所から流れ直す
+      last = 0;
+      raf2 = requestAnimationFrame(frame);
+    };
     const setUi = () => {
       pauseBtn.classList.toggle('is-paused', paused);
       pauseBtn.querySelector('.gal-pause-t').textContent = paused ? '動かす' : '止める';
+      track.classList.toggle('is-flow', !paused);   // 止めたらカードの位置を合わせる
     };
-    const stop = () => { clearInterval(timer); timer = 0; };
-    const tick = () => {
-      if (atEnd()) {
-        if (++rounds >= LOOPS) { paused = true; setUi(); stop(); return; }
-        track.scrollTo({ left: 0 });
-      } else {
-        track.scrollBy({ left: step() });
-      }
-    };
-    const start = () => { stop(); if (running()) timer = setInterval(tick, INT); };
-    const takeOver = () => { if (!paused) { paused = true; setUi(); stop(); } };   // 自分で送ったら、自動はやめる
-    track.addEventListener('pointerdown', takeOver, { passive: true });
-    track.addEventListener('touchstart', takeOver, { passive: true });
-    track.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) takeOver(); }, { passive: true });
-    [prev, next].forEach(b => b && b.addEventListener('click', takeOver));
+    const pauseAWhile = () => { stop(); clearTimeout(rest); rest = setTimeout(() => { rest = 0; start(); }, REST); };
+    track.addEventListener('touchstart', () => { touching = true; stop(); }, { passive: true });
+    const untouch = () => { touching = false; pauseAWhile(); };
+    track.addEventListener('touchend', untouch, { passive: true });
+    track.addEventListener('touchcancel', untouch, { passive: true });
+    track.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') pauseAWhile(); }, { passive: true });
+    track.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) pauseAWhile(); }, { passive: true });
+    [prev, next].forEach(b => b && b.addEventListener('click', pauseAWhile));
     g.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { hover = true; stop(); } });
     g.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { hover = false; start(); } });
     const byKey = el => { try { return el.matches(':focus-visible'); } catch (e) { return false; } };
     g.addEventListener('focusin', e => { if (byKey(e.target)) { focusIn = true; stop(); } });
     g.addEventListener('focusout', e => { if (!g.contains(e.relatedTarget)) { focusIn = false; start(); } });
-    pauseBtn.addEventListener('click', () => { paused = !paused; if (!paused) { rounds = 0; hover = false; } setUi(); start(); });
-    if ('IntersectionObserver' in window) new IntersectionObserver(es => { inView = es[0].isIntersecting; start(); }, { threshold: 0.5 }).observe(g);
+    pauseBtn.addEventListener('click', () => {
+      paused = !paused;
+      if (!paused) { hover = false; clearTimeout(rest); rest = 0; }
+      stop(); setUi(); start();
+    });
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { inView = es[0].isIntersecting; if (inView) start(); else stop(); }, { threshold: 0.25 }).observe(g);
     else { inView = true; start(); }
-    document.addEventListener('visibilitychange', start);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
     setUi();
+    start();
   });
 
   /* 7) 流れる英字の帯：スクロールに合わせて横に動く（自分では動かない） */

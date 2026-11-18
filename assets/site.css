@@ -596,10 +596,10 @@ html.motion .hero-bg img{animation:kb 16s cubic-bezier(.2,.6,.3,1) both}
 /* ---------- 最初の画面の写真のスライド（トップ） ---------- */
 .hs{position:absolute;inset:0 0 0 46%;z-index:-2}
 .hs-slides{position:absolute;inset:0}
-.hs-slide{position:absolute;inset:0;margin:0;opacity:0;transition:opacity 1.2s ease}
+.hs-slide{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .9s ease}
 .hs-slide.is-on{opacity:1}
 .hs-slide img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,60% 45%)}
-html.motion .hs-slide.is-on img{animation:kb 9s cubic-bezier(.2,.6,.3,1) both}
+html.motion .hs-slide.is-on img{animation:kb 4.5s cubic-bezier(.2,.6,.3,1) both}
 .hs-ctrl{position:absolute;right:24px;bottom:40px;z-index:2;display:flex;align-items:center;gap:14px;color:#fff}
 .hs-cap{font-size:12px;font-weight:600;letter-spacing:.18em;text-shadow:0 1px 4px rgba(0,0,0,.7)}
 .hs-dots{display:flex;gap:0}
@@ -830,3 +830,5 @@ html.intro-skip .hero-in>*{animation:introUp2 1s cubic-bezier(.2,.7,.2,1) var(--
 .gal-pause-ic{width:10px;height:12px;border-left:3px solid currentColor;border-right:3px solid currentColor}
 .gal-pause.is-paused .gal-pause-ic{width:0;height:0;border:0;border-left:10px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent}
 html:not(.motion) .gal-pause{display:none}
+/* 事業内容のカードが流れている間（site.js の 6.5）。位置合わせとなめらかな送りを切る */
+html.motion .gal-track.is-flow{scroll-snap-type:none;scroll-behavior:auto}
